@@ -35,14 +35,19 @@ app_matched_xwindows = list()
 app_curr_active_window = False
 active_window_matched = -1
 for i,xwin in enumerate(xwindows):
-    if not xwin:
+    if (not xwin):
         continue
     # Get the X id, WM_CLASS and title of the X window
     xdata = string.split(xwin, maxsplit=4)
     xid = xdata[wmctrl_columns['id']]
-    wmclass = xdata[wmctrl_columns['wm_class']]
+    desktop = xdata[wmctrl_columns['desktop']]
+    wmclass = xdata[wmctrl_columns['wm_class']].lower()
     title = xdata[wmctrl_columns['title']].lower()
     
+    # Discard invalid desktop
+    if (desktop == "-1"):
+        continue
+
     # Matched window by title or by wmclass
     matched = False
     if (title.find(in_pattern) >= 0 or wmclass.find(in_pattern) >= 0):
@@ -66,12 +71,11 @@ print "app_last_active_window_of_apps", app_last_active_window_of_apps
 print "active_window_matched", active_window_matched
 
 # No windows matched, nowhere to switch to
-if (not len(app_matched_xwindows)):
+if (not app_matched_xwindows):
     print "No xwindow matched the query."
     to_activate = False
-
 # If the active window is in the list of matched windows, activate the next one in the list
-if (active_window_matched >= 0):
+elif (active_window_matched >= 0):
     if (len(app_matched_xwindows) == 1):
         print "The only matched window is active."
         to_activate = False
